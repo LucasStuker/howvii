@@ -1,4 +1,5 @@
-const db = require ('./db');
+const fs = require('fs'); // Importando o módulo fs para manipular arquivos
+const db = require('./db'); // Importando a conexão com o banco de dados
 
 const sql = `
 SELECT 
@@ -16,23 +17,25 @@ JOIN
     TipoImovel t ON i.id_tipo_imovel = t.id_tipo_imovel;
 `;
 
+// Executando a consulta SQL
 db.all(sql, [], (err, rows) => {
     if (err) {
         throw err;
     }
-    const results = rows.map((row) => {
-        return {
-            id_venda: row.id_venda,
-            data_do_pagamento: row.data_do_pagamento,
-            valor_do_pagamento: row.valor_do_pagamento,
-            codigo_imovel: row.codigo_imovel,
-            descricao_imovel: row.descricao_imovel,
-            tipo_imovel: row.tipo_imovel
-        };
+    
+    // Salvando os dados em um arquivo JSON
+    const jsonData = JSON.stringify(rows, null, 2); // Converter o resultado em JSON formatado
+
+    fs.writeFile('resultados.json', jsonData, (err) => {
+        if (err) {
+            console.error('Erro ao salvar os resultados em um arquivo JSON:', err.message);
+        } else {
+            console.log('Resultados salvos com sucesso no arquivo resultados.json');
+        }
     });
-    console.log(results);
 });
 
+// Fechando a conexão com o banco de dados
 db.close((err) => {
     if (err) {
         console.error('Erro ao fechar a conexão com o banco de dados:', err.message);
